@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import openpyxl
 import random
+import ARX_model
 # 엑셀 파일 오픈
 wb = openpyxl.load_workbook('trackresult.xlsx')
 # 맨 앞 시트 추출
@@ -46,8 +47,8 @@ def data_setting(x, y):
     past_data = [0, 0, 0]  # 속도, x,y
     for row in data:
         time_data.append(row[0])
-        x.output.append(row[1])
-        y.output.append(row[2])
+        y.output.append(row[1])
+        x.output.append(row[2])
         y.input.append(row[3])
         x.input.append(row[4])
 
@@ -70,7 +71,7 @@ def movement_error(v):
     if v <= 5:
         mean = given_error*v/5
     elif v > 5:
-        mean = 0.1 + pow(((v-5)*0.1), 2)
+        mean = 0.3 + pow(((v-5)*0.1), 2)
     error = np.random.normal(0, 0.1, 1)
     error = error[0] * mean
     return error
@@ -97,9 +98,23 @@ if __name__ == "__main__":
     data_setting(x, y)
     make_noise(x)
     make_noise(y)
-    draw_plot(time_data, x.input, 0, 0, "time(sec)", "x-axis(m)")
-    draw_plot(time_data, y.input, 0, 0, "time(sec)", "y-axis(m)")
-    draw_plot(time_data, x.output, 0, 0, "time(sec)", "x-axis(m)")
-    draw_plot(time_data, y.output, 0, 0, "time(sec)", "y-axis(m)")
-    draw_plot(time_data, x.noise_output, 0, 0, "time(sec)", "x-axis(m)")
-    draw_plot(time_data, y.noise_output, 0, 0, "time(sec)", "y-axis(m)")
+
+    arx_ans = ARX_model.ARX(x.input, x.output, 10, 9)
+    draw_plot(time_data, x.input, 0, 0, "time", "result")
+    draw_plot(time_data, x.output, 0, 0, "time", "result")
+    draw_plot(time_data, arx_ans, 0, 0, "time", "result")
+
+    arx_ans = ARX_model.ARX(x.input, x.noise_output, 10, 9)
+    draw_plot(time_data, x.input, 0, 0, "time", "result")
+    draw_plot(time_data, x.noise_output, 0, 0, "time", "result")
+    draw_plot(time_data, arx_ans, 0, 0, "time", "result")
+
+    arx_ans = ARX_model.ARX(y.input, y.output, 10, 9)
+    draw_plot(time_data, y.input, 0, 0, "time", "result")
+    draw_plot(time_data, y.output, 0, 0, "time", "result")
+    draw_plot(time_data, arx_ans, 0, 0, "time", "result")
+
+    arx_ans = ARX_model.ARX(y.input, y.noise_output, 10, 9)
+    draw_plot(time_data, y.input, 0, 0, "time", "result")
+    draw_plot(time_data, y.noise_output, 0, 0, "time", "result")
+    draw_plot(time_data, arx_ans, 0, 0, "time", "result")
